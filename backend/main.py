@@ -1,6 +1,6 @@
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 from carbon.calculator import (
     calculate_transport,
@@ -28,7 +28,7 @@ from database.database import (
 
 
 # =========================================================
-# APP
+# ECOAI APPLICATION
 # =========================================================
 
 app = FastAPI(
@@ -39,14 +39,18 @@ app = FastAPI(
 
 
 # =========================================================
-# CORS
+# CORS CONFIGURATION
 # =========================================================
 
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
+        # Local development
         "http://localhost:5173",
         "http://127.0.0.1:5173",
+
+        # Production frontend
+        "https://eco-ai-zeta.vercel.app",
     ],
     allow_credentials=True,
     allow_methods=["*"],
@@ -84,7 +88,9 @@ class ActivityRequest(BaseModel):
 class ChatRequest(BaseModel):
     message: str
     total_carbon: float = 0
-    category_impacts: dict[str, float] = {}
+    category_impacts: dict[str, float] = Field(
+        default_factory=dict
+    )
 
 
 # =========================================================
@@ -97,7 +103,7 @@ def startup():
 
 
 # =========================================================
-# BASIC ROUTES
+# ROOT
 # =========================================================
 
 @app.get("/")
@@ -105,8 +111,13 @@ def root():
     return {
         "message": "EcoAI Backend is running 🌱",
         "status": "success",
+        "version": "1.0.0",
     }
 
+
+# =========================================================
+# HEALTH CHECK
+# =========================================================
 
 @app.get("/health")
 def health():
@@ -122,7 +133,7 @@ def health():
 @app.post("/calculate")
 def calculate_carbon(data: CarbonRequest):
 
-    category = data.category.lower()
+    category = data.category.strip().lower()
     amount = data.amount
 
     if amount < 0:
@@ -141,7 +152,7 @@ def calculate_carbon(data: CarbonRequest):
     elif category == "electricity":
 
         carbon = calculate_electricity(
-            amount,
+            amount
         )
 
     elif category == "food":
@@ -154,13 +165,13 @@ def calculate_carbon(data: CarbonRequest):
     elif category == "water":
 
         carbon = calculate_water(
-            amount,
+            amount
         )
 
     elif category == "waste":
 
         carbon = calculate_waste(
-            amount,
+            amount
         )
 
     else:
@@ -171,11 +182,11 @@ def calculate_carbon(data: CarbonRequest):
         )
 
     score = calculate_sustainability_score(
-        carbon,
+        carbon
     )
 
     level = get_carbon_level(
-        carbon,
+        carbon
     )
 
     return {
@@ -189,12 +200,12 @@ def calculate_carbon(data: CarbonRequest):
 
 
 # =========================================================
-# AI RECOMMENDATION
+# CATEGORY RECOMMENDATION
 # =========================================================
 
 @app.post("/recommendation")
 def recommendation(
-    data: RecommendationRequest,
+    data: RecommendationRequest
 ):
 
     result = generate_recommendation(
@@ -214,7 +225,7 @@ def recommendation(
 
 @app.post("/overall-insight")
 def overall_insight(
-    data: OverallInsightRequest,
+    data: OverallInsightRequest
 ):
 
     result = generate_overall_insight(
@@ -232,9 +243,7 @@ def overall_insight(
 # =========================================================
 
 @app.post("/chat")
-def chat(
-    data: ChatRequest,
-):
+def chat(data: ChatRequest):
 
     message = data.message.strip()
 
@@ -258,12 +267,12 @@ def chat(
 
 
 # =========================================================
-# SAVE ACTIVITY
+# CREATE ACTIVITY
 # =========================================================
 
 @app.post("/activities")
 def create_activity(
-    data: ActivityRequest,
+    data: ActivityRequest
 ):
 
     if data.amount < 0:
@@ -296,7 +305,7 @@ def create_activity(
 
 
 # =========================================================
-# GET ACTIVITIES
+# GET ALL ACTIVITIES
 # =========================================================
 
 @app.get("/activities")
@@ -314,11 +323,11 @@ def activities():
 
 @app.delete("/activities/{activity_id}")
 def remove_activity(
-    activity_id: int,
+    activity_id: int
 ):
 
     deleted = delete_activity(
-        activity_id,
+        activity_id
     )
 
     if not deleted:
