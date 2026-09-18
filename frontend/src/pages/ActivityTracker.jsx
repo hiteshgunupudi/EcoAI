@@ -15,7 +15,7 @@ import {
 } from "lucide-react";
 import { Link } from "react-router-dom";
 
-const API_BASE = "http://127.0.0.1:8000";
+const API_BASE = "http://https://ecoai-backend-5fgd.onrender.com";
 
 const CATEGORY_CONFIG = {
   transport: {
