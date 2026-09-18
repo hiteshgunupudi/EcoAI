@@ -22,7 +22,7 @@ import {
 
 import EcoAICopilot from "../components/EcoAICopilot";
 
-const API_URL = "http://https://ecoai-backend-5fgd.onrender.com";
+const API_URL = "https://ecoai-backend-5fgd.onrender.com";
 
 const CATEGORY_CONFIG = {
   transport: {

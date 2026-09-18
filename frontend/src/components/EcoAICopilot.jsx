@@ -11,7 +11,7 @@ import {
   X,
 } from "lucide-react";
 
-const API_URL = "http://https://ecoai-backend-5fgd.onrender.com";
+const API_URL = "https://ecoai-backend-5fgd.onrender.com";
 
 function EcoAICopilot() {
   const [open, setOpen] = useState(false);
@@ -33,7 +33,6 @@ function EcoAICopilot() {
 
   const messagesEndRef = useRef(null);
 
-
   // =========================
   // Load Activities
   // =========================
@@ -53,17 +52,14 @@ function EcoAICopilot() {
       setActivities(
         data.activities || []
       );
-
     } catch (error) {
       console.error(error);
     }
   }
 
-
   useEffect(() => {
     loadActivities();
   }, []);
-
 
   // =========================
   // Activity Context
@@ -78,13 +74,10 @@ function EcoAICopilot() {
     );
   }, [activities]);
 
-
   const categoryImpacts = useMemo(() => {
-
     const result = {};
 
     activities.forEach((activity) => {
-
       const category =
         activity.category;
 
@@ -93,33 +86,26 @@ function EcoAICopilot() {
         Number(
           activity.carbon_kg || 0
         );
-
     });
 
     return result;
-
   }, [activities]);
-
 
   // =========================
   // Scroll to Latest Message
   // =========================
 
   useEffect(() => {
-
     messagesEndRef.current?.scrollIntoView({
       behavior: "smooth",
     });
-
   }, [messages]);
-
 
   // =========================
   // Send Message
   // =========================
 
   async function sendMessage(customMessage = null) {
-
     const text =
       customMessage !== null
         ? customMessage
@@ -142,9 +128,7 @@ function EcoAICopilot() {
 
     setSending(true);
 
-
     try {
-
       const response = await fetch(
         `${API_URL}/chat`,
         {
@@ -166,22 +150,18 @@ function EcoAICopilot() {
         }
       );
 
-
       if (!response.ok) {
         throw new Error(
           "AI service unavailable"
         );
       }
 
-
       const data =
         await response.json();
-
 
       const aiText =
         data.response?.message ||
         "I couldn't generate a response right now.";
-
 
       setMessages((previous) => [
         ...previous,
@@ -191,9 +171,7 @@ function EcoAICopilot() {
           text: aiText,
         },
       ]);
-
     } catch (error) {
-
       setMessages((previous) => [
         ...previous,
         {
@@ -206,21 +184,16 @@ function EcoAICopilot() {
       ]);
 
       console.error(error);
-
     } finally {
-
       setSending(false);
-
     }
   }
-
 
   const quickQuestions = [
     "How can I reduce my carbon footprint?",
     "What should I improve?",
     "Give me a sustainable transport tip",
   ];
-
 
   return (
     <>
@@ -229,30 +202,24 @@ function EcoAICopilot() {
       ========================================= */}
 
       {!open && (
-
         <button
           onClick={() => setOpen(true)}
           className="fixed bottom-6 right-6 z-50 flex h-16 w-16 items-center justify-center rounded-2xl bg-emerald-400 text-[#062018] shadow-2xl shadow-emerald-400/25 transition hover:scale-105 hover:bg-emerald-300"
           aria-label="Open EcoAI Copilot"
         >
-
           <MessageCircle size={26} />
 
           <span className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-cyan-400 text-[9px] font-black text-[#062018]">
             AI
           </span>
-
         </button>
-
       )}
-
 
       {/* =========================================
           Chat Window
       ========================================= */}
 
       {open && (
-
         <div className="fixed bottom-5 right-5 z-50 flex h-[min(680px,calc(100vh-40px))] w-[min(420px,calc(100vw-40px))] flex-col overflow-hidden rounded-[2rem] border border-emerald-400/15 bg-[#071a15] shadow-2xl shadow-black/50">
 
           {/* Header */}
@@ -264,9 +231,7 @@ function EcoAICopilot() {
               <div className="flex items-center gap-3">
 
                 <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-emerald-400 text-[#062018] shadow-lg shadow-emerald-400/20">
-
                   <Bot size={22} />
-
                 </div>
 
                 <div>
@@ -289,20 +254,16 @@ function EcoAICopilot() {
 
               </div>
 
-
               <button
                 onClick={() => setOpen(false)}
                 className="flex h-9 w-9 items-center justify-center rounded-xl bg-white/5 text-white/40 transition hover:bg-white/10 hover:text-white"
               >
-
                 <X size={18} />
-
               </button>
 
             </div>
 
           </div>
-
 
           {/* Context */}
 
@@ -326,7 +287,6 @@ function EcoAICopilot() {
             </p>
 
           </div>
-
 
           {/* Messages */}
 
@@ -361,7 +321,6 @@ function EcoAICopilot() {
 
                 </div>
 
-
                 {/* Bubble */}
 
                 <div
@@ -382,7 +341,6 @@ function EcoAICopilot() {
 
             ))}
 
-
             {/* Typing */}
 
             {sending && (
@@ -390,9 +348,7 @@ function EcoAICopilot() {
               <div className="flex gap-3">
 
                 <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-emerald-400/10 text-emerald-300">
-
                   <Bot size={15} />
-
                 </div>
 
                 <div className="flex items-center gap-2 rounded-2xl rounded-tl-md border border-white/5 bg-white/[0.035] px-4 py-3">
@@ -416,7 +372,6 @@ function EcoAICopilot() {
 
           </div>
 
-
           {/* Quick Questions */}
 
           {!sending && messages.length <= 1 && (
@@ -439,9 +394,7 @@ function EcoAICopilot() {
                       }
                       className="rounded-xl border border-white/5 bg-white/[0.025] px-3 py-2 text-left text-[10px] text-white/40 transition hover:border-emerald-400/20 hover:bg-emerald-400/5 hover:text-emerald-300"
                     >
-
                       {question}
-
                     </button>
 
                   )
@@ -452,7 +405,6 @@ function EcoAICopilot() {
             </div>
 
           )}
-
 
           {/* Input */}
 
@@ -482,13 +434,10 @@ function EcoAICopilot() {
                 }
                 className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-emerald-400 text-[#062018] transition hover:bg-emerald-300 disabled:cursor-not-allowed disabled:opacity-30"
               >
-
                 <Send size={16} />
-
               </button>
 
             </form>
-
 
             <div className="mt-2 flex items-center justify-center gap-1.5 text-[9px] text-white/15">
 
@@ -501,7 +450,6 @@ function EcoAICopilot() {
           </div>
 
         </div>
-
       )}
 
     </>
