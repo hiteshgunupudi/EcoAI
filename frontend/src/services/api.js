@@ -1,4 +1,4 @@
-const API_BASE_URL = "http://https://ecoai-backend-5fgd.onrender.com";
+const API_BASE_URL = "https://ecoai-backend-5fgd.onrender.com";
 
 
 async function request(endpoint, options = {}) {
