@@ -15,7 +15,7 @@ import {
 } from "lucide-react";
 import { Link } from "react-router-dom";
 
-const API_BASE = "http://https://ecoai-backend-5fgd.onrender.com";
+const API_BASE = "https://ecoai-backend-5fgd.onrender.com";
 
 const CATEGORY_CONFIG = {
   transport: {
@@ -143,8 +143,10 @@ export default function ActivityTracker() {
 
       setActivities(data.activities || []);
     } catch (err) {
+      console.error("EcoAI activity loading error:", err);
+
       setError(
-        "Backend connection failed. Make sure FastAPI is running on port 8000."
+        "Unable to connect to EcoAI backend. Please try refreshing the page."
       );
     } finally {
       setLoading(false);
@@ -183,7 +185,8 @@ export default function ActivityTracker() {
       const data = await response.json();
 
       setPreviewCarbon(Number(data.carbon_kg || 0));
-    } catch {
+    } catch (err) {
+      console.error("EcoAI calculation error:", err);
       setPreviewCarbon(0);
     } finally {
       setCalculating(false);
@@ -252,9 +255,11 @@ export default function ActivityTracker() {
       setPreviewCarbon(0);
 
       await loadActivities();
-    } catch {
+    } catch (err) {
+      console.error("EcoAI save activity error:", err);
+
       setError(
-        "Unable to save activity. Please check that the backend is running."
+        "Unable to save activity. Please check your connection and try again."
       );
     } finally {
       setSaving(false);
@@ -280,8 +285,10 @@ export default function ActivityTracker() {
       );
 
       setMessage("Activity deleted successfully.");
-    } catch {
-      setError("Unable to delete this activity.");
+    } catch (err) {
+      console.error("EcoAI delete activity error:", err);
+
+      setError("Unable to delete this activity. Please try again.");
     } finally {
       setDeleting(null);
     }
@@ -320,8 +327,11 @@ export default function ActivityTracker() {
 
       setActivities([]);
       setMessage("All demo activity data has been cleared.");
-    } catch {
+    } catch (err) {
+      console.error("EcoAI clear activities error:", err);
+
       setError("Some activities could not be deleted. Please try again.");
+
       await loadActivities();
     } finally {
       setClearing(false);
@@ -352,7 +362,8 @@ export default function ActivityTracker() {
     const counts = {};
 
     activities.forEach((activity) => {
-      counts[activity.category] = (counts[activity.category] || 0) + 1;
+      counts[activity.category] =
+        (counts[activity.category] || 0) + 1;
     });
 
     return Object.entries(counts).sort((a, b) => b[1] - a[1]);
@@ -379,6 +390,7 @@ export default function ActivityTracker() {
               <div className="text-lg font-bold tracking-tight">
                 Eco<span className="text-emerald-400">AI</span>
               </div>
+
               <div className="text-[10px] uppercase tracking-[0.25em] text-white/35">
                 Sustainability Intelligence
               </div>
@@ -461,12 +473,15 @@ export default function ActivityTracker() {
               <div>
                 <div className="mb-2 flex items-center gap-2 text-emerald-300">
                   <Zap size={17} />
+
                   <span className="text-xs font-semibold uppercase tracking-[0.2em]">
                     New Activity
                   </span>
                 </div>
 
-                <h2 className="text-2xl font-semibold">Add an activity</h2>
+                <h2 className="text-2xl font-semibold">
+                  Add an activity
+                </h2>
 
                 <p className="mt-1 text-sm text-white/40">
                   Your impact is calculated instantly.
@@ -488,7 +503,9 @@ export default function ActivityTracker() {
                 <div className="relative">
                   <select
                     value={category}
-                    onChange={(event) => setCategory(event.target.value)}
+                    onChange={(event) =>
+                      setCategory(event.target.value)
+                    }
                     className="w-full appearance-none rounded-2xl border border-white/10 bg-black/20 px-4 py-3.5 pr-11 text-sm text-white outline-none transition focus:border-emerald-400/40 focus:ring-2 focus:ring-emerald-400/10"
                   >
                     {Object.entries(CATEGORY_CONFIG).map(
@@ -550,7 +567,11 @@ export default function ActivityTracker() {
                         type="button"
                         onClick={() => {
                           setMode(option.value);
-                          setTimeout(() => calculatePreview(), 0);
+
+                          setTimeout(
+                            () => calculatePreview(),
+                            0
+                          );
                         }}
                         className={`rounded-2xl border px-4 py-3 text-sm transition ${
                           mode === option.value
@@ -604,7 +625,10 @@ export default function ActivityTracker() {
               >
                 {saving ? (
                   <>
-                    <Loader2 size={18} className="animate-spin" />
+                    <Loader2
+                      size={18}
+                      className="animate-spin"
+                    />
                     Saving...
                   </>
                 ) : (
@@ -665,9 +689,7 @@ export default function ActivityTracker() {
 
                   <p className="mt-1 font-semibold">
                     {highestImpact
-                      ? `${formatCategory(
-                          highestImpact.category
-                        )}`
+                      ? formatCategory(highestImpact.category)
                       : "No data yet"}
                   </p>
                 </div>
@@ -680,7 +702,10 @@ export default function ActivityTracker() {
                   </span>
 
                   <span className="font-semibold text-orange-300">
-                    {Number(highestImpact.carbon_kg).toFixed(2)} kg CO₂e
+                    {Number(
+                      highestImpact.carbon_kg
+                    ).toFixed(2)}{" "}
+                    kg CO₂e
                   </span>
                 </div>
               )}
@@ -704,26 +729,29 @@ export default function ActivityTracker() {
                 </p>
               ) : (
                 <div className="space-y-3">
-                  {categoryCount.map(([itemCategory, count]) => (
-                    <div
-                      key={itemCategory}
-                      className="flex items-center justify-between rounded-2xl border border-white/5 bg-black/15 px-4 py-3"
-                    >
-                      <div className="flex items-center gap-3">
-                        <span className="text-lg">
-                          {CATEGORY_CONFIG[itemCategory]?.icon || "🌱"}
-                        </span>
+                  {categoryCount.map(
+                    ([itemCategory, count]) => (
+                      <div
+                        key={itemCategory}
+                        className="flex items-center justify-between rounded-2xl border border-white/5 bg-black/15 px-4 py-3"
+                      >
+                        <div className="flex items-center gap-3">
+                          <span className="text-lg">
+                            {CATEGORY_CONFIG[itemCategory]?.icon ||
+                              "🌱"}
+                          </span>
 
-                        <span className="text-sm text-white/70">
-                          {formatCategory(itemCategory)}
+                          <span className="text-sm text-white/70">
+                            {formatCategory(itemCategory)}
+                          </span>
+                        </div>
+
+                        <span className="rounded-full bg-white/5 px-3 py-1 text-xs text-white/45">
+                          {count}
                         </span>
                       </div>
-
-                      <span className="rounded-full bg-white/5 px-3 py-1 text-xs text-white/45">
-                        {count}
-                      </span>
-                    </div>
-                  ))}
+                    )
+                  )}
                 </div>
               )}
             </div>
@@ -736,6 +764,7 @@ export default function ActivityTracker() {
             <div>
               <div className="mb-2 flex items-center gap-2 text-emerald-300">
                 <Database size={16} />
+
                 <span className="text-xs font-semibold uppercase tracking-[0.2em]">
                   Activity History
                 </span>
@@ -766,7 +795,10 @@ export default function ActivityTracker() {
                   className="flex items-center gap-2 rounded-xl border border-red-400/15 bg-red-400/5 px-4 py-2.5 text-xs font-medium text-red-300/80 transition hover:bg-red-400/10 hover:text-red-300 disabled:opacity-50"
                 >
                   {clearing ? (
-                    <Loader2 size={15} className="animate-spin" />
+                    <Loader2
+                      size={15}
+                      className="animate-spin"
+                    />
                   ) : (
                     <Trash2 size={15} />
                   )}
@@ -795,8 +827,8 @@ export default function ActivityTracker() {
               <h3 className="font-semibold">No activities yet</h3>
 
               <p className="mt-2 max-w-md text-sm leading-6 text-white/35">
-                Add your first daily activity above. Your carbon estimate and
-                history will appear here automatically.
+                Add your first daily activity above. Your carbon estimate
+                and history will appear here automatically.
               </p>
             </div>
           ) : (
@@ -808,7 +840,8 @@ export default function ActivityTracker() {
                 >
                   <div className="flex items-center gap-4">
                     <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-white/5 text-xl">
-                      {CATEGORY_CONFIG[activity.category]?.icon || "🌱"}
+                      {CATEGORY_CONFIG[activity.category]?.icon ||
+                        "🌱"}
                     </div>
 
                     <div>
@@ -833,21 +866,31 @@ export default function ActivityTracker() {
 
                   <div className="flex items-center justify-between gap-5 sm:justify-end">
                     <div className="text-left sm:text-right">
-                      <p className="text-xs text-white/30">Estimated impact</p>
+                      <p className="text-xs text-white/30">
+                        Estimated impact
+                      </p>
 
                       <p className="mt-1 font-semibold text-emerald-300">
-                        {Number(activity.carbon_kg || 0).toFixed(2)} kg CO₂e
+                        {Number(
+                          activity.carbon_kg || 0
+                        ).toFixed(2)}{" "}
+                        kg CO₂e
                       </p>
                     </div>
 
                     <button
-                      onClick={() => deleteActivity(activity.id)}
+                      onClick={() =>
+                        deleteActivity(activity.id)
+                      }
                       disabled={deleting === activity.id}
                       title="Delete activity"
                       className="flex h-10 w-10 items-center justify-center rounded-xl border border-white/10 bg-white/5 text-white/30 transition hover:border-red-400/20 hover:bg-red-400/10 hover:text-red-300 disabled:opacity-50"
                     >
                       {deleting === activity.id ? (
-                        <Loader2 size={16} className="animate-spin" />
+                        <Loader2
+                          size={16}
+                          className="animate-spin"
+                        />
                       ) : (
                         <Trash2 size={16} />
                       )}
@@ -867,13 +910,15 @@ export default function ActivityTracker() {
             </div>
 
             <div>
-              <h3 className="font-semibold">Responsible AI & transparency</h3>
+              <h3 className="font-semibold">
+                Responsible AI & transparency
+              </h3>
 
               <p className="mt-2 text-sm leading-6 text-white/40">
-                EcoAI provides estimated carbon values for decision support.
-                Results depend on the configured prototype emission factors
-                and should not be treated as certified greenhouse-gas
-                accounting.
+                EcoAI provides estimated carbon values for decision
+                support. Results depend on the configured prototype
+                emission factors and should not be treated as certified
+                greenhouse-gas accounting.
               </p>
             </div>
           </div>

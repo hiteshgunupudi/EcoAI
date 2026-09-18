@@ -1,175 +1,330 @@
+import { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import {
+  Leaf,
+  Mail,
+  Lock,
+  User,
+  ArrowRight,
+  ShieldCheck,
+  CheckCircle2,
+} from "lucide-react";
+
 function Register() {
+  const navigate = useNavigate();
+
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+
+    setError("");
+
+    if (!name.trim() || !email.trim() || !password || !confirmPassword) {
+      setError("Please fill in all fields.");
+      return;
+    }
+
+    if (password.length < 6) {
+      setError("Password must be at least 6 characters.");
+      return;
+    }
+
+    if (password !== confirmPassword) {
+      setError("Passwords do not match.");
+      return;
+    }
+
+    setLoading(true);
+
+    const existingUser = localStorage.getItem("ecoai_user");
+
+    if (existingUser) {
+      const parsedUser = JSON.parse(existingUser);
+
+      if (parsedUser.email.toLowerCase() === email.trim().toLowerCase()) {
+        setError("An account with this email already exists.");
+        setLoading(false);
+        return;
+      }
+    }
+
+    const user = {
+      name: name.trim(),
+      email: email.trim().toLowerCase(),
+      password,
+    };
+
+    localStorage.setItem("ecoai_user", JSON.stringify(user));
+
+    localStorage.setItem("ecoai_authenticated", "true");
+
+    localStorage.setItem(
+      "ecoai_current_user",
+      JSON.stringify({
+        name: user.name,
+        email: user.email,
+      })
+    );
+
+    setTimeout(() => {
+      navigate("/dashboard");
+    }, 500);
+  };
+
   return (
-    <div className="min-h-screen bg-[#06110D] text-white">
+    <div className="min-h-screen bg-[#f5f8f3] text-slate-900">
+      <div className="grid min-h-screen lg:grid-cols-2">
 
-      {/* Background */}
-      <div className="pointer-events-none fixed inset-0 overflow-hidden">
-        <div className="absolute -left-40 -top-40 h-96 w-96 rounded-full bg-emerald-500/10 blur-3xl" />
-        <div className="absolute -right-40 top-1/3 h-96 w-96 rounded-full bg-green-400/5 blur-3xl" />
-        <div className="absolute -bottom-40 left-1/3 h-96 w-96 rounded-full bg-emerald-500/5 blur-3xl" />
-      </div>
+        {/* LEFT SIDE */}
+        <div className="relative hidden overflow-hidden bg-[#0d2f24] lg:flex">
+          <div className="absolute -left-32 -top-32 h-96 w-96 rounded-full bg-emerald-500/20 blur-3xl" />
+          <div className="absolute -bottom-40 -right-20 h-[28rem] w-[28rem] rounded-full bg-teal-400/10 blur-3xl" />
 
-      {/* Header */}
-      <header className="relative z-10 border-b border-white/10">
-        <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-5">
+          <div className="relative z-10 flex w-full flex-col justify-between p-12 xl:p-16">
 
-          <a href="/" className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-400/10">
-              <span className="text-xl">🌱</span>
-            </div>
+            {/* BRAND */}
+            <Link to="/" className="flex items-center gap-3">
+              <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-emerald-400 text-[#0d2f24] shadow-lg shadow-emerald-500/20">
+                <Leaf size={23} strokeWidth={2.5} />
+              </div>
 
-            <div>
-              <h1 className="text-xl font-bold">
-                EcoAI
+              <div>
+                <p className="text-xl font-bold tracking-tight text-white">
+                  EcoAI
+                </p>
+                <p className="text-xs text-emerald-200/70">
+                  Smart Carbon Intelligence
+                </p>
+              </div>
+            </Link>
+
+            {/* CONTENT */}
+            <div className="max-w-xl">
+              <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-emerald-300/20 bg-emerald-400/10 px-4 py-2 text-sm text-emerald-200">
+                <Leaf size={15} />
+                Start your sustainability journey
+              </div>
+
+              <h1 className="text-5xl font-bold leading-tight tracking-tight text-white xl:text-6xl">
+                Make every
+                <span className="block text-emerald-300">
+                  choice count.
+                </span>
               </h1>
 
-              <p className="text-[10px] uppercase tracking-[0.2em] text-emerald-400">
-                Sustainable Intelligence
+              <p className="mt-6 max-w-lg text-lg leading-8 text-emerald-100/70">
+                Create your EcoAI account and start understanding,
+                tracking, and reducing your everyday carbon footprint.
               </p>
+
+              <div className="mt-10 space-y-4">
+                {[
+                  "Track your daily environmental impact",
+                  "Get personalized sustainability insights",
+                  "Use AI to discover practical green actions",
+                ].map((item) => (
+                  <div
+                    key={item}
+                    className="flex items-center gap-3 text-sm text-emerald-100/80"
+                  >
+                    <CheckCircle2
+                      size={18}
+                      className="shrink-0 text-emerald-300"
+                    />
+                    {item}
+                  </div>
+                ))}
+              </div>
             </div>
-          </a>
 
-          <a
-            href="/"
-            className="text-sm text-slate-400 transition hover:text-white"
-          >
-            ← Back to Home
-          </a>
-
+            {/* FOOTER */}
+            <p className="text-sm text-emerald-100/40">
+              © 2026 EcoAI · AI for a more sustainable future
+            </p>
+          </div>
         </div>
-      </header>
 
-      {/* Main */}
-      <main className="relative z-10 flex min-h-[calc(100vh-81px)] items-center justify-center px-6 py-10">
+        {/* RIGHT SIDE */}
+        <div className="flex items-center justify-center px-6 py-10 sm:px-10 lg:px-16">
+          <div className="w-full max-w-md">
 
-        <div className="w-full max-w-md">
+            {/* MOBILE BRAND */}
+            <div className="mb-10 flex items-center justify-center lg:hidden">
+              <Link to="/" className="flex items-center gap-3">
+                <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-[#0d2f24] text-emerald-300">
+                  <Leaf size={23} />
+                </div>
 
-          {/* Register Card */}
-          <div className="rounded-3xl border border-white/10 bg-white/[0.045] p-8 shadow-2xl backdrop-blur-xl sm:p-10">
-
-            {/* Icon */}
-            <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-emerald-400/10">
-              <span className="text-2xl">🌍</span>
+                <div className="text-left">
+                  <p className="text-xl font-bold text-slate-900">
+                    EcoAI
+                  </p>
+                  <p className="text-xs text-slate-500">
+                    Smart Carbon Intelligence
+                  </p>
+                </div>
+              </Link>
             </div>
 
-            {/* Heading */}
-            <div className="mt-5 text-center">
-              <h2 className="text-3xl font-bold">
+            {/* HEADER */}
+            <div className="mb-8">
+              <div className="mb-5 flex h-12 w-12 items-center justify-center rounded-2xl bg-emerald-100 text-emerald-700">
+                <User size={22} />
+              </div>
+
+              <h2 className="text-3xl font-bold tracking-tight text-slate-900">
                 Create your account
               </h2>
 
-              <p className="mt-2 text-sm leading-6 text-slate-400">
-                Start tracking your impact and build a greener lifestyle.
+              <p className="mt-2 text-sm leading-6 text-slate-500">
+                Join EcoAI and begin tracking your environmental impact.
               </p>
             </div>
 
-            {/* Form */}
-            <form className="mt-7 space-y-4">
+            {/* FORM */}
+            <form onSubmit={handleSubmit} className="space-y-5">
 
-              {/* Name */}
+              {/* NAME */}
               <div>
-                <label className="mb-2 block text-sm font-medium text-slate-300">
+                <label className="mb-2 block text-sm font-medium text-slate-700">
                   Full name
                 </label>
 
-                <input
-                  type="text"
-                  placeholder="Enter your full name"
-                  className="w-full rounded-xl border border-white/10 bg-black/20 px-4 py-3.5 text-sm text-white outline-none transition placeholder:text-slate-600 focus:border-emerald-400/50 focus:ring-2 focus:ring-emerald-400/10"
-                />
+                <div className="relative">
+                  <User
+                    size={18}
+                    className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"
+                  />
+
+                  <input
+                    type="text"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    placeholder="Enter your name"
+                    className="w-full rounded-xl border border-slate-200 bg-white py-3.5 pl-11 pr-4 text-sm outline-none transition focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/10"
+                  />
+                </div>
               </div>
 
-              {/* Email */}
+              {/* EMAIL */}
               <div>
-                <label className="mb-2 block text-sm font-medium text-slate-300">
+                <label className="mb-2 block text-sm font-medium text-slate-700">
                   Email address
                 </label>
 
-                <input
-                  type="email"
-                  placeholder="you@example.com"
-                  className="w-full rounded-xl border border-white/10 bg-black/20 px-4 py-3.5 text-sm text-white outline-none transition placeholder:text-slate-600 focus:border-emerald-400/50 focus:ring-2 focus:ring-emerald-400/10"
-                />
+                <div className="relative">
+                  <Mail
+                    size={18}
+                    className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"
+                  />
+
+                  <input
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="you@example.com"
+                    className="w-full rounded-xl border border-slate-200 bg-white py-3.5 pl-11 pr-4 text-sm outline-none transition focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/10"
+                  />
+                </div>
               </div>
 
-              {/* Password */}
+              {/* PASSWORD */}
               <div>
-                <label className="mb-2 block text-sm font-medium text-slate-300">
+                <label className="mb-2 block text-sm font-medium text-slate-700">
                   Password
                 </label>
 
-                <input
-                  type="password"
-                  placeholder="Create a strong password"
-                  className="w-full rounded-xl border border-white/10 bg-black/20 px-4 py-3.5 text-sm text-white outline-none transition placeholder:text-slate-600 focus:border-emerald-400/50 focus:ring-2 focus:ring-emerald-400/10"
-                />
+                <div className="relative">
+                  <Lock
+                    size={18}
+                    className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"
+                  />
+
+                  <input
+                    type="password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    placeholder="Create a password"
+                    className="w-full rounded-xl border border-slate-200 bg-white py-3.5 pl-11 pr-4 text-sm outline-none transition focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/10"
+                  />
+                </div>
               </div>
 
-              {/* Confirm Password */}
+              {/* CONFIRM PASSWORD */}
               <div>
-                <label className="mb-2 block text-sm font-medium text-slate-300">
+                <label className="mb-2 block text-sm font-medium text-slate-700">
                   Confirm password
                 </label>
 
-                <input
-                  type="password"
-                  placeholder="Confirm your password"
-                  className="w-full rounded-xl border border-white/10 bg-black/20 px-4 py-3.5 text-sm text-white outline-none transition placeholder:text-slate-600 focus:border-emerald-400/50 focus:ring-2 focus:ring-emerald-400/10"
-                />
+                <div className="relative">
+                  <ShieldCheck
+                    size={18}
+                    className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"
+                  />
+
+                  <input
+                    type="password"
+                    value={confirmPassword}
+                    onChange={(e) =>
+                      setConfirmPassword(e.target.value)
+                    }
+                    placeholder="Confirm your password"
+                    className="w-full rounded-xl border border-slate-200 bg-white py-3.5 pl-11 pr-4 text-sm outline-none transition focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/10"
+                  />
+                </div>
               </div>
 
-              {/* Terms */}
-              <label className="flex cursor-pointer items-start gap-2 pt-1">
-                <input
-                  type="checkbox"
-                  className="mt-0.5 h-4 w-4 accent-emerald-400"
-                />
+              {/* ERROR */}
+              {error && (
+                <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600">
+                  {error}
+                </div>
+              )}
 
-                <span className="text-xs leading-5 text-slate-500">
-                  I agree to the{" "}
-                  <span className="text-emerald-400">
-                    Terms of Service
-                  </span>{" "}
-                  and{" "}
-                  <span className="text-emerald-400">
-                    Privacy Policy
-                  </span>
-                </span>
-              </label>
-
-              {/* Button */}
+              {/* SUBMIT */}
               <button
                 type="submit"
-                className="mt-2 w-full rounded-xl bg-emerald-400 py-3.5 font-bold text-[#06110D] transition hover:bg-emerald-300 hover:shadow-lg hover:shadow-emerald-400/10"
+                disabled={loading}
+                className="group flex w-full items-center justify-center gap-2 rounded-xl bg-[#0d2f24] px-5 py-3.5 text-sm font-semibold text-white shadow-lg shadow-[#0d2f24]/10 transition hover:-translate-y-0.5 hover:bg-[#123d2f] disabled:cursor-not-allowed disabled:opacity-70"
               >
-                Create Account
-              </button>
+                {loading ? "Creating account..." : "Create Account"}
 
+                {!loading && (
+                  <ArrowRight
+                    size={17}
+                    className="transition-transform group-hover:translate-x-1"
+                  />
+                )}
+              </button>
             </form>
 
-            {/* Login */}
-            <div className="mt-6 text-center text-sm text-slate-500">
+            {/* LOGIN LINK */}
+            <p className="mt-7 text-center text-sm text-slate-500">
               Already have an account?{" "}
-
-              <a
-                href="/login"
-                className="font-semibold text-emerald-400 transition hover:text-emerald-300"
+              <Link
+                to="/login"
+                className="font-semibold text-emerald-700 transition hover:text-emerald-800"
               >
                 Sign in
-              </a>
+              </Link>
+            </p>
+
+            {/* SECURITY NOTE */}
+            <div className="mt-8 flex items-center justify-center gap-2 text-xs text-slate-400">
+              <ShieldCheck size={14} />
+              Demo authentication · Your data stays in this browser
             </div>
 
           </div>
-
-          {/* Bottom */}
-          <p className="mt-5 text-center text-xs text-slate-600">
-            🌱 Small actions today. A better planet tomorrow.
-          </p>
-
         </div>
-
-      </main>
-
+      </div>
     </div>
   );
 }
